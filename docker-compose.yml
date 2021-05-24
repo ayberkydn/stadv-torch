@@ -12,16 +12,12 @@ x-base: &default-settings
 services:
   shell:
     <<: *default-settings
-    volumes:
-      - ~:/home/ayb
     command: "/bin/bash"
     stdin_open: true
     tty: true
 
   main:
     <<: *default-settings
-    volumes:
-      - ~:/home/ayb
     command: "python main.py"
     stdin_open: true
     tty: true
