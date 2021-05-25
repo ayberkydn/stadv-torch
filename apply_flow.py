@@ -55,6 +55,7 @@ def apply_flow(img_batch, flow_batch):
     
     sampled_pixel_indices_reduced = sampled_pixel_indices_y * W + sampled_pixel_indices_x
     sampled_pixel_indices_reduced_flat = repeat(sampled_pixel_indices_reduced, 'b h w four -> b c (h w four)', c = 3)
+    #sampled_pixel_indices_reduced_flat = repeat(sampled_pixel_indices_reduced, 'b h w four -> b c (h w four)', c = 1)
     
     img_batch_flat = rearrange(img_batch, 'b c h w -> b c (h w)')
     
