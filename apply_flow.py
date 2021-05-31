@@ -1,6 +1,7 @@
 import torch
 from einops import rearrange, reduce, repeat
 
+
 def apply_flow(img_batch, flow_batch):
 
     assert img_batch.device == flow_batch.device
@@ -24,7 +25,9 @@ def apply_flow(img_batch, flow_batch):
 
     added = repeat(
         torch.tensor(
-            [[0, 0], [0, 1], [1, 0], [1, 1]], dtype=torch.long, device=device,
+            [[0, 0], [0, 1], [1, 0], [1, 1]],
+            dtype=torch.long,
+            device=device,
         ),
         "ind c -> b h w ind c",
         b=BATCH_SIZE,
@@ -33,7 +36,11 @@ def apply_flow(img_batch, flow_batch):
     )
 
     sampled_pixel_indices = (
-        repeat(torch.floor(sampling_grid).long(), "b h w c -> b h w 4 c",) + added
+        repeat(
+            torch.floor(sampling_grid).long(),
+            "b h w c -> b h w 4 c",
+        )
+        + added
     )
 
     sampled_pixel_distances = torch.abs(
@@ -76,3 +83,10 @@ def apply_flow(img_batch, flow_batch):
     )
 
     return sampled_pixels_weighted_sum
+
+
+if __name__ == "__main__":
+    img = torch.randn([8, 3, 224, 224])
+    flow = torch.randn([8, 224, 224, 2])
+
+    apply_flow(img, flow)
