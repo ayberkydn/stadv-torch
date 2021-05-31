@@ -1,7 +1,6 @@
 import torch
 from einops import rearrange, reduce, repeat
 
-
 def apply_flow(img_batch, flow_batch):
 
     assert img_batch.device == flow_batch.device
