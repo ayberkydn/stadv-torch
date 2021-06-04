@@ -1,7 +1,7 @@
 version: "3"
 
 x-base: &default-settings
-  image: ayberkydn/deep-learning
+  build: .
   user: ayb
   runtime: nvidia
   ipc: host
