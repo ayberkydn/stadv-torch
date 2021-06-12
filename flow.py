@@ -1,6 +1,6 @@
 from einops import rearrange, reduce, repeat
 
-import torch
+import torch, torchvision
 
 
 class Flow(torch.nn.Module):
@@ -18,8 +18,8 @@ class Flow(torch.nn.Module):
         else:
             self.parameterization = parameterization
 
-        self.flow_field = torch.nn.Parameter(
-            torch.randn([self.H, self.W, 2]), requires_grad=True
+        self.pre_flow_field = torch.nn.Parameter(
+            torch.randn([2, self.H, self.W]), requires_grad=True
         )
 
     def forward(self, x):
@@ -28,11 +28,11 @@ class Flow(torch.nn.Module):
         ), "flow is initialized with different shape than image"
 
         BATCH_SIZE = x.shape[0]
-        applied_flow_field = self.parameterization(self.flow_field)
+        applied_flow_field = self.parameterization(self.pre_flow_field)
 
         grid = torch.stack(
             torch.meshgrid(torch.arange(self.H), torch.arange(self.W))
-        ).to(self.flow_field.device)
+        ).to(self.pre_flow_field.device)
         # grid: Tensor[2, H, W] // grid[:, n, m] = (n, m)
 
         batched_grid = repeat(
@@ -42,7 +42,7 @@ class Flow(torch.nn.Module):
         )
 
         applied_flow_field_batch = repeat(
-            applied_flow_field, "h w yx -> b h w yx", b=BATCH_SIZE
+            applied_flow_field, "yx h w -> b h w yx", b=BATCH_SIZE
         )
         sampling_grid = batched_grid + applied_flow_field_batch
         return self.sample_grid(x, sampling_grid)
@@ -127,9 +127,33 @@ class Flow(torch.nn.Module):
 
         return sampled_pixels_weighted_sum
 
+    def get_applied_flow(self):
+        return self.parameterization(self.pre_flow_field)
+
+
+def flow_loss(flow_layer):
+    applied_flow = flow_layer.get_applied_flow()
+    padded_flow = torchvision.transforms.Pad(
+        padding=[1, 1],
+        padding_mode="reflect",
+    )(applied_flow)
+
+    right = padded_flow[:, 1:-1, 2:]
+    left = padded_flow[:, 1:-1, :-2]
+    down = padded_flow[:, 2:, 1:-1]
+    up = padded_flow[:, :-2, 1:-1]
+
+    d_right = torch.sqrt(torch.sum(torch.square(applied_flow - right), dim=0))
+    d_left = torch.sqrt(torch.sum(torch.square(applied_flow - left), dim=0))
+    d_down = torch.sqrt(torch.sum(torch.square(applied_flow - down), dim=0))
+    d_up = torch.sqrt(torch.sum(torch.square(applied_flow - up), dim=0))
+
+    return torch.sum(d_right + d_left + d_down + d_up)
+
 
 if __name__ == "__main__":
     img = torch.randn(1, 3, 100, 224)
-    flow = Flow(height=100, width=224)
+    flow = Flow(height=100, width=224, parameterization=lambda x: torch.tanh(x))
 
     flowed_img = flow(img)
+    print(flow_loss(flow))
