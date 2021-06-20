@@ -2,10 +2,10 @@ version: "3"
 
 x-base: &default-settings
   build: ./docker
-  user: user
   runtime: nvidia
   ipc: host
   working_dir: ${PWD}
+  user: user
   volumes:
     - ~:/home/user
 
@@ -15,13 +15,13 @@ services:
     command: "bin/bash"
     stdin_open: true
     tty: true
-  
+
   lab:
     <<: *default-settings
     ports:
       - 8888:8888
     command: "jupyter-lab --ip 0.0.0.0 --port 8888 --no-browser --allow-root --ServerApp.token='' --ServerApp.password=''"
-  
+
   tensorboard:
     <<: *default-settings
     ports:
