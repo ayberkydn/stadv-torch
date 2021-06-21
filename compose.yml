@@ -1,18 +1,19 @@
 version: "3"
 
 x-base: &default-settings
-  build: ./docker
+  build: .
   runtime: nvidia
   ipc: host
-  working_dir: ${PWD}
   user: user
   volumes:
     - ~:/home/user
+    - ${PWD}:/workspace
+  working_dir: /workspace
 
 services:
   main:
     <<: *default-settings
-    command: "bin/bash"
+    command: "/bin/bash"
     stdin_open: true
     tty: true
 
