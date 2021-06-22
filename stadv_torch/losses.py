@@ -22,10 +22,17 @@ def flow_loss(flow_layer):
 
 
 def adv_loss(adv_logits, target_class, kappa):
+    """
+    adv_logits: [..., C]
+    target_class: non-negative integer
+    kappa: non-positive real number
+    """
     target_masked_logits = adv_logits.clone()
-    target_masked_logits[target_class] = target_masked_logits.min() - 0.1
-    nontarget_max = target_masked_logits.max()
+    target_masked_logits[..., target_class] = target_masked_logits.min(dim=-1) - 0.1
+    nontarget_max = target_masked_logits.max(dim=-1)
     # nontarget_max will never be adv_logits[target_class]
 
-    loss = torch.maximum(nontarget_max - adv_logits[target_class], torch.tensor(kappa))
+    loss = torch.maximum(
+        nontarget_max - adv_logits[..., target_class], torch.tensor(kappa)
+    )
     return loss
