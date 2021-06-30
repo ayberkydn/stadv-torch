@@ -17,6 +17,7 @@ def flow_loss(flow_layer):
     d_left = torch.sqrt(torch.sum(torch.square(applied_flow - left), dim=0))
     d_down = torch.sqrt(torch.sum(torch.square(applied_flow - down), dim=0))
     d_up = torch.sqrt(torch.sum(torch.square(applied_flow - up), dim=0))
+    # print(applied_flow - padded_flow[:, 1:-1, 1:-1])
 
     return torch.sum(d_right + d_left + d_down + d_up)
 
