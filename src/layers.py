@@ -19,7 +19,7 @@ class Flow(torch.nn.Module):
             self.parameterization = parameterization
 
         self._pre_flow_field = torch.nn.Parameter(
-            torch.randn([2, self.H, self.W]), requires_grad=True
+            torch.randn([2, self.H, self.W]) * 0.1, requires_grad=True
         )
 
     def forward(self, x):
