@@ -16,7 +16,6 @@ image_yuv = kornia.color.rgb_to_yuv(image)
 
 def param_fn(x):
     return torch.tanh(x)
-    # return x * 5
 
 
 flow_layer = Flow(299, 299, parameterization=param_fn)
