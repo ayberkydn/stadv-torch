@@ -1,6 +1,6 @@
 # stAdv-torch
 
-[![stadv-animation](anim.gif)]
+[![stadv-animation](animation.gif)]
 
 PyTorch implementation of [Spatially Transformed Adversarial Examples](https://arxiv.org/abs/1801.02612)
 
