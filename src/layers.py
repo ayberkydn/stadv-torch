@@ -19,7 +19,7 @@ class Flow(torch.nn.Module):
             self.parameterization = parameterization
 
         self._pre_flow_field = torch.nn.Parameter(
-            torch.randn([2, self.H, self.W]) * 0.1, requires_grad=True
+            torch.randn([2, self.H, self.W]) * 1, requires_grad=True
         )
 
     def forward(self, x):
@@ -35,11 +35,7 @@ class Flow(torch.nn.Module):
         ).to(self._pre_flow_field.device)
         # grid: Tensor[2, H, W] // grid[:, n, m] = (n, m)
 
-        batched_grid = repeat(
-            grid,
-            "c h w -> b h w c",
-            b=BATCH_SIZE,
-        )
+        batched_grid = repeat(grid, "c h w -> b h w c", b=BATCH_SIZE,)
 
         applied_flow_field_batch = repeat(
             applied_flow_field, "yx h w -> b h w yx", b=BATCH_SIZE
@@ -97,9 +93,7 @@ class Flow(torch.nn.Module):
         )
 
         sampled_pixel_indices_flat = repeat(
-            sampled_pixel_indices,
-            "b h w four -> b c (h w four)",
-            c=num_channels,
+            sampled_pixel_indices, "b h w four -> b c (h w four)", c=num_channels,
         )
 
         img_batch_flat = rearrange(img_batch, "b c h w -> b c (h w)")
@@ -117,9 +111,7 @@ class Flow(torch.nn.Module):
         )
 
         sampled_pixels_weighted = sampled_pixels * repeat(
-            sampled_pixel_weights,
-            "b h w four -> b c h w four",
-            c=num_channels,
+            sampled_pixel_weights, "b h w four -> b c h w four", c=num_channels,
         )
         sampled_pixels_weighted_sum = reduce(
             sampled_pixels_weighted, "b c h w four -> b c h w", reduction="sum"
@@ -129,3 +121,8 @@ class Flow(torch.nn.Module):
 
     def get_applied_flow(self):
         return self.parameterization(self._pre_flow_field)
+
+
+class Attacker:
+    def __init__(self):
+        pass

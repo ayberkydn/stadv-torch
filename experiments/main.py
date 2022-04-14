@@ -16,11 +16,7 @@ normalize = torchvision.transforms.Normalize(
     (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
 )
 
-img = (
-    ttf.to_tensor(Image.open("./samples/bulbul.jpeg").resize([W, H]))
-    .unsqueeze(0)
-    .cuda()
-)
+img = ttf.to_tensor(Image.open("./samples/2400.png").resize([W, H])).unsqueeze(0).cuda()
 
 
 def param_fn(x):
@@ -30,11 +26,11 @@ def param_fn(x):
     return torch.tanh(x)
 
 
-flow_layer = src.layers.Flow(H, W, parameterization=param_fn).to("cuda")
+flow_layer = src.layers.Flow(H, W, parameterization=None,).to("cuda")
 ##src.utils.visualize_flow(flow_layer)
 net = torchvision.models.resnet50(pretrained=True).cuda().eval()
 optimizer = torch.optim.Adam(flow_layer.parameters(), lr=0.01)
-tau = 0.005
+tau = 0.00
 target_class = 76
 # %% w
 adv_losses = []
@@ -42,7 +38,7 @@ flow_losses = []
 for n in tqdm.tqdm(range(500)):
     flowed_img = flow_layer(img)
     out = net(normalize(flowed_img))[0]
-    adv_loss = src.losses.adv_loss(out, target_class, -10)
+    adv_loss = src.losses.adv_loss(out, target_class, 0)
     flow_loss = src.losses.flow_loss(flow_layer)
     adv_losses.append(adv_loss.item())
     flow_losses.append(flow_loss.item())
@@ -62,5 +58,5 @@ plt.imshow(kornia.tensor_to_image(img))
 plt.show()
 plt.imshow(kornia.tensor_to_image(flow_layer(img)))
 plt.show()
-src.utils.visualize_flow(flow_layer, kornia.tensor_to_image(flowed_img))
+# src.utils.visualize_flow(flow_layer, kornia.tensor_to_image(flowed_img))
 # %%
