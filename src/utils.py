@@ -101,11 +101,3 @@ class NIPS2017TargetedDataset(Dataset):
         }
 
 
-# %%
-
-
-# fig_flow = src.layers.Flow(30, 30, parameterization=lambda x: torch.tanh(x) / 1.5)
-# visualize_flow(fig_flow)
-
-# %%
-# %%
