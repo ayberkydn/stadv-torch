@@ -6,3 +6,4 @@ __pycache__
 /results
 /samples
 /saved_images
+*.png

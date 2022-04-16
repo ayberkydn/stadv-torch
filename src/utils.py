@@ -40,9 +40,8 @@ def flow_uv(image, flow_layer):
     img_yuv = kornia.color.rgb_to_yuv(image)
     img_y = img_yuv[:, :1, :, :]
     img_uv = img_yuv[:, 1:, :, :]
-    uv_flowed_img = flow_layer(img_uv)
-    flowed_img = torch.cat([img_y, uv_flowed_img], dim=-3)
-
+    flowed_img = flow_layer(img_uv)
+    flowed_img = torch.cat([img_y, flowed_img], dim=-3)
     return kornia.color.yuv_to_rgb(flowed_img)
 
 
@@ -50,10 +49,18 @@ def flow_h(image, flow_layer):
     img_hsv = kornia.color.rgb_to_hsv(image)
     img_h = img_hsv[:, :1, :, :]
     img_sv = img_hsv[:, 1:, :, :]
-    h_flowed_img = flow_layer(h)
-    flowed_img = torch.cat([h_flowed_img, img_sv], dim=-3)
+    flowed_img = flow_layer(img_h)
+    flowed_img = torch.cat([flowed_img, img_sv], dim=-3)
+    return kornia.color.hsv_to_rgb(flowed_img)
 
-def flow_l(image, flow_layer):
+
+def flow_ab(image, flow_layer):
+    img_lab = kornia.color.rgb_to_lab(image)
+    img_l = img_lab[:, :1, :, :]
+    img_ab = img_lab[:, 1:, :, :]
+    flowed_img = flow_layer(img_ab)
+    flowed_img = torch.cat([img_l, flowed_img], dim=-3)
+    return kornia.color.lab_to_rgb(flowed_img)
 
 
 class NIPS2017TargetedDataset(Dataset):
@@ -101,3 +108,11 @@ class NIPS2017TargetedDataset(Dataset):
         }
 
 
+# %%
+
+
+# fig_flow = src.layers.Flow(30, 30, parameterization=lambda x: torch.tanh(x) / 1.5)
+# visualize_flow(fig_flow)
+
+# %%
+# %%
