@@ -21,7 +21,7 @@ data = dataset[10]
 
 param_fn = lambda x: torch.tanh(x)
 # param_fn = lambda x: x
-flow_layer = src.layers.Flow(299, 299, parameterization=param_fn).to("cuda")
+flow_layer = src.layers.Flow(299, 299, param=param_fn).to("cuda")
 
 optimizer = torch.optim.Adam(flow_layer.parameters(), lr=0.05)
 

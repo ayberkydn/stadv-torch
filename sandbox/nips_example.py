@@ -21,7 +21,7 @@ img = data["image"].cuda().unsqueeze(0)
 true_class = data["true_class"]
 target_class = data["target_class"]
 
-flow_layer = src.layers.Flow(299, 299, parameterization=None).to("cuda")
+flow_layer = src.layers.Flow(299, 299, param=None).to("cuda")
 optimizer = torch.optim.Adam(flow_layer.parameters(), lr=0.1)
 #%%
 

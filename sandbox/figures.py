@@ -18,7 +18,7 @@ def param_fn(x):
     return torch.tanh(x)
 
 
-flow_layer = Flow(299, 299, parameterization=param_fn)
+flow_layer = Flow(299, 299, param=param_fn)
 
 image_y = image_yuv[:, :1, :, :]
 image_uv = image_yuv[:, 1:, :, :]
@@ -64,6 +64,6 @@ plt.imsave("samples/zoomed_uv.png", t2i(z_uv), dpi=300)
 plt.imsave("samples/zoomed_distorted_uv.png", t2i(z_distorted_uv), dpi=300)
 # %%
 
-fig_flow = Flow(50, 50, parameterization=lambda x: torch.tanh(x) / 3)
+fig_flow = Flow(50, 50, param=lambda x: torch.tanh(x) / 3)
 src.utils.visualize_flow(fig_flow)
 # %%

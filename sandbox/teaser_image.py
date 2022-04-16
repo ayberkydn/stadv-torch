@@ -33,7 +33,7 @@ plt.show()
 
 #%% stadv
 
-flow_layer = src.layers.Flow(299, 299, parameterization=None).to("cuda")
+flow_layer = src.layers.Flow(299, 299, param=None).to("cuda")
 optimizer = torch.optim.Adam(flow_layer.parameters(), lr=0.1)
 K = -2
 tau = 0.0025
@@ -55,7 +55,7 @@ plt.show()
 
 
 # %% bizim atak
-flow_layer = src.layers.Flow(299, 299, parameterization=None).to("cuda")
+flow_layer = src.layers.Flow(299, 299, param=None).to("cuda")
 optimizer = torch.optim.Adam(flow_layer.parameters(), lr=0.1)
 K = 0
 for n in tqdm.tqdm(range(200)):
