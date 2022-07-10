@@ -1,0 +1,8 @@
+program: experiments/targeted.py
+method: grid
+project: paper
+parameters:
+  mode:
+    values: ["lab", "ycbcr", "rgb"]
+  is_restricted:
+    values: [True, False]

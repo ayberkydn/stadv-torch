@@ -7,3 +7,6 @@ __pycache__
 /samples
 /saved_images
 *.png
+*.pt
+/wandb
+/artifacts
