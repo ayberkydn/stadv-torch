@@ -1,62 +1,48 @@
 # %%
-import matplotlib.pyplot as plt
-import numpy as np
-from PIL import Image
-import torchvision.transforms.functional as ttf
+from matplotlib import pyplot as plt
+import torch, torchvision
+import wandb
 import src
-from src.flow import Flow
-from src.utils import t_imshow
-import importlib
+import os
+import kornia
+import numpy as np
+import src.utils
 
-for n in [
-    25,
-]:  # 19, 10, 7, 5, 4, 2, 1, 0]:
+api = wandb.Api()
+dataset = src.utils.NIPS2017TargetedDataset("./data")
 
-    for mode in ["rgb", "ycbcr", "lab"]:
+print(run.config)
+hist = run.history()
+summary = run.summary
+arts = run.logged_artifacts()
+art = arts[0]
 
-        data = src.utils.NIPS2017TargetedDataset("./data")[n]
-        img = data["image"].unsqueeze(0).cuda()
-        net = src.utils.load_net()
-        attacker = src.attacker.SpatialAttacker(
-            img, net, batch_size=1, mode=mode, is_restricted=False
-        )
+if not os.path.exists(art.file()):
+    print(f"Downloading {art.file()}")
+    art.download()
+mode, res, n = run.config["mode"], run.config["is_restricted"], run.config["data_n"]
+item_path = f"./artifacts/{mode}_{res}_{n}:v0/adv.pt"
 
-        target_class = data["target_class"]
-        target_class_name = data["target_class_name"]
-        attacker.attack_targeted(target_class, max_iters=1000, K=10, lr=0.1)
+item_n = run.config["data_n"]
+adv_tensor = torch.load(item_path)
+benign_tensor = dataset[item_n]["image"]
+benign_np = kornia.tensor_to_image(benign_tensor)
+adv_np = kornia.tensor_to_image(adv_tensor)
+diff = benign_np - adv_np
+diff = diff / np.abs(diff).max() / 2 + 0.5
+# plt.imshow(benign_np)
+# plt.show()
+# plt.imshow(adv_np)
+# plt.show()
+# plt.imshow(diff)
+# plt.show()
 
-        summary = attacker.get_attack_summary()
-        logits_probs = attacker.get_logits_probs()
-
-        target_prob = summary.target_prob
-        target_class_name = data["target_class_name"]
-        # t_imshow(summary["benign_tensor"])
-        # t_imshow(summary["adversarial_tensor"])
-
-        # plt.imshow(attacker.get_benign_np())
-        # plt.title(f"Benign image")
-        # plt.axis("off")
-        # plt.savefig(
-        #     f"figures/examples/benign_{n}.png", bbox_inches="tight", pad_inches=0
-        # )
-        # plt.show()
-
-        # plt.imshow(attacker.get_adversarial_np())
-        # plt.axis("off")
-        # plt.title(f'"{target_class_name}": p={target_prob:0.3f}')
-        # plt.savefig(
-        #     f"figures/examples/example_{mode}_{n}.png",
-        #     bbox_inches="tight",
-        #     pad_inches=0,
-        # )
-        # plt.show()
-
-        print(summary)
-        print("---")
-
-    # # %%
-    # a = Flow(299, 299, 1, 0, param=lambda x: 50 * torch.tanh(x + 50)).cuda()
-    # t_imshow(a(img))
-
-
-# %%
+run.summary["colorfulness"] = src.utils.image_colorfulness(benign_np)
+# run.update()
+#%%
+# for file in run.files():
+#     print(file)
+#     try:
+#         file.download()
+#     except:
+#         pass

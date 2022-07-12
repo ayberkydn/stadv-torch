@@ -7,6 +7,7 @@ import os
 import csv
 import kornia
 from piqa.tv import tv
+import numpy as np
 
 
 # def visualize_flow(flow_layer, image=None, grid=False, figsize=[15, 15]):
@@ -210,3 +211,22 @@ def adv_loss(adv_logits_batch, target_class, K):
         loss = torch.maximum(nontarget_max - target_class_logit, torch.tensor(-K))
         losses[n] = loss
     return losses, losses.sum()
+
+
+def image_colorfulness(image):
+    # split the image into its respective RGB components
+    (R, G, B) = image[..., 0], image[..., 1], image[..., 2]
+    # compute rg = R - G
+    rg = np.absolute(R - G)
+    # compute yb = 0.5 * (R + G) - B
+    yb = np.absolute(0.5 * (R + G) - B)
+    # compute the mean and standard deviation of both `rg` and `yb`
+    (rbMean, rbStd) = (np.mean(rg), np.std(rg))
+    (ybMean, ybStd) = (np.mean(yb), np.std(yb))
+    # combine the mean and standard deviations
+    stdRoot = np.sqrt((rbStd ** 2) + (ybStd ** 2))
+    meanRoot = np.sqrt((rbMean ** 2) + (ybMean ** 2))
+    # derive the "colorfulness" metric and return it
+    colorfulness = stdRoot + (0.3 * meanRoot)
+
+    return stdRoot, meanRoot, colorfulness
