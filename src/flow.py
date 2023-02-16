@@ -25,7 +25,7 @@ class Flow(torch.nn.Module):
         )
         self.basegrid.requires_grad = False
 
-        if param == None:
+        if param is None:
             self.parameterization = torch.nn.Identity()
         else:
             self.parameterization = param
@@ -36,10 +36,9 @@ class Flow(torch.nn.Module):
         )
 
     def _normalize_grid(self, in_grid):
-
         """
-            Normalize x and y coords of in_grid into range -1, 1 to keep torch.grid_sample happy
-
+            Normalize x and y coords of in_grid into range -1, 1
+            to keep torch.grid_sample happy
         """
         grid_x = in_grid[..., 0]
         grid_y = in_grid[..., 1]
@@ -48,9 +47,10 @@ class Flow(torch.nn.Module):
 
     def forward(self, x):
         assert len(x.shape) == 4  # Image does contain batch dim
-        assert x.shape[0] == self._pre_flow_field.shape[0], "NOT SAME SAHPE!!!!"
+        assert x.shape[0] == self._pre_flow_field.shape[0], "NOT SAME SHAPE!"
 
-        grid = self.basegrid + self._normalize_grid(self.get_applied_flow_pixels())
+        grid = self.basegrid + \
+            self._normalize_grid(self.get_applied_flow_pixels())
 
         return torch.nn.functional.grid_sample(
             x, grid, align_corners=True, padding_mode="reflection"
@@ -58,4 +58,3 @@ class Flow(torch.nn.Module):
 
     def get_applied_flow_pixels(self):
         return self.parameterization(self._pre_flow_field)
-
